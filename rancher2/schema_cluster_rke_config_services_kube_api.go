@@ -84,16 +84,6 @@ func clusterRKEConfigServicesKubeAPIAdmissionConfigurationFields() map[string]*s
 			Default:     clusterRKEConfigServicesKubeAPIAdmissionConfigurationKindDefault,
 			Description: "Admission configuration Kind",
 		},
-		// "name": {
-		// 	Type:        schema.TypeString,
-		// 	Required:    true,
-		// 	Description: "Admission configuration name",
-		// },
-		// "path": {
-		// 	Type:        schema.TypeString,
-		// 	Optional:    true,
-		// 	Description: "Admission configuration path",
-		// },
 		"plugins": {
 			Type:     schema.TypeList,
 			Optional: true,
@@ -275,6 +265,67 @@ func clusterRKEConfigServicesKubeAPIAuditLogFields() map[string]*schema.Schema {
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  false,
+		},
+	}
+	return s
+}
+
+func clusterRKEConfigServicesKubeAPIAdmissionConfigPluginsFieldsV0() map[string]*schema.Schema {
+	s := map[string]*schema.Schema{
+		"name": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+		},
+		"path": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Default:  "",
+		},
+		"configuration": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+		},
+	}
+	return s
+}
+func clusterRKEConfigServicesKubeAPIAdmissionConfigPluginsFields() map[string]*schema.Schema {
+	s := map[string]*schema.Schema{
+		"name": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+		},
+		"path": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Default:  "",
+		},
+		"configuration": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+			ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+				v, ok := val.(string)
+				if !ok || len(v) == 0 {
+					return
+				}
+				_, err := ghodssyamlToMapInterface(v)
+				if err != nil {
+					errs = append(errs, fmt.Errorf("%q must be in yaml format, error: %v", key, err))
+					return
+				}
+				return
+			},
+			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+				if old == "" || new == "" {
+					return false
+				}
+				oldMap, _ := ghodssyamlToMapInterface(old)
+				newMap, _ := ghodssyamlToMapInterface(new)
+				return reflect.DeepEqual(oldMap, newMap)
+			},
 		},
 	}
 	return s
