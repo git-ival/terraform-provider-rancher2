@@ -96,6 +96,10 @@ func flattenCluster(d *schema.ResourceData, in *Cluster, clusterRegToken *manage
 		d.Set("default_pod_security_policy_template_id", in.DefaultPodSecurityPolicyTemplateID)
 	}
 
+	if len(in.DefaultPodSecurityAdmissionConfigurationTemplateName) > 0 {
+		d.Set("default_pod_security_admission_configuration_template_name", in.DefaultPodSecurityAdmissionConfigurationTemplateName)
+	}
+
 	if len(in.DesiredAgentImage) > 0 {
 		d.Set("desired_agent_image", in.DesiredAgentImage)
 	}
@@ -435,6 +439,10 @@ func expandCluster(in *schema.ResourceData) (*Cluster, error) {
 
 	if v, ok := in.Get("default_pod_security_policy_template_id").(string); ok && len(v) > 0 {
 		obj.DefaultPodSecurityPolicyTemplateID = v
+	}
+
+	if v, ok := in.Get("default_pod_security_admission_configuration_template_name").(string); ok && len(v) > 0 {
+		obj.DefaultPodSecurityAdmissionConfigurationTemplateName = v
 	}
 
 	if v, ok := in.Get("desired_agent_image").(string); ok && len(v) > 0 {
