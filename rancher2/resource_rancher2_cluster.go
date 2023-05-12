@@ -104,21 +104,10 @@ func resourceRancher2ClusterStateUpgradeV0(rawState map[string]interface{}, meta
 												}
 											}
 										}
-										if admissionConfig, ok := kubeAPI["admission_configuration"].(map[string]interface{}); ok && len(admissionConfig) > 0 {
-											if plugins, ok := admissionConfig["plugins"].([]interface{}); ok {
-												for i5 := range plugins {
-													if plugin, ok := plugins[i5].(map[string]interface{}); ok && len(plugins) > 0 {
-														newValue := ""
-														if len(plugin) > 0 {
-															conf, err := mapInterfaceToYAML(plugin)
-															if err == nil {
-																newValue = conf
-															}
-														}
-														rawState["rke_config"].([]interface{})[i1].(map[string]interface{})["services"].([]interface{})[i2].(map[string]interface{})["kube_api"].([]interface{})[i3].(map[string]interface{})["admission_configuration"].(map[string]interface{})["plugins"].([]map[string]interface{})[i5]["configuration"] = newValue
-													}
-												}
-											}
+										if admissionConfig, ok := kubeAPI["admission_configuration"].(map[string]interface{}); ok {
+											newValue := []map[string]interface{}{}
+											newValue = append(newValue, admissionConfig)
+											rawState["rke_config"].([]interface{})[i1].(map[string]interface{})["services"].([]interface{})[i2].(map[string]interface{})["kube_api"].([]interface{})[i3].(map[string]interface{})["admission_configuration"] = newValue
 										}
 									}
 								}
