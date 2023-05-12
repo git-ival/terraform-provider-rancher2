@@ -39,12 +39,12 @@ func resourceRancher2Cluster() *schema.Resource {
 			return nil
 		},
 		Schema:        clusterFields(),
-		SchemaVersion: 1,
+		SchemaVersion: 2,
 		StateUpgraders: []schema.StateUpgrader{
 			{
 				Type:    resourceRancher2ClusterResourceV0().CoreConfigSchema().ImpliedType(),
 				Upgrade: resourceRancher2ClusterStateUpgradeV0,
-				Version: 0,
+				Version: 1,
 			},
 		},
 		// Setting default timeouts to be liberal in order to accommodate managed Kubernetes providers like EKS, GKE, and AKS
@@ -100,6 +100,22 @@ func resourceRancher2ClusterStateUpgradeV0(rawState map[string]interface{}, meta
 															}
 														}
 														rawState["rke_config"].([]interface{})[i1].(map[string]interface{})["services"].([]interface{})[i2].(map[string]interface{})["kube_api"].([]interface{})[i3].(map[string]interface{})["secrets_encryption_config"].([]interface{})[i4].(map[string]interface{})["custom_config"] = newValue
+													}
+												}
+											}
+										}
+										if admissionConfig, ok := kubeAPI["admission_configuration"].(map[string]interface{}); ok && len(admissionConfig) > 0 {
+											if plugins, ok := admissionConfig["plugins"].([]interface{}); ok {
+												for i5 := range plugins {
+													if plugin, ok := plugins[i5].(map[string]interface{}); ok && len(plugins) > 0 {
+														newValue := ""
+														if len(plugin) > 0 {
+															conf, err := mapInterfaceToYAML(plugin)
+															if err == nil {
+																newValue = conf
+															}
+														}
+														rawState["rke_config"].([]interface{})[i1].(map[string]interface{})["services"].([]interface{})[i2].(map[string]interface{})["kube_api"].([]interface{})[i3].(map[string]interface{})["admission_configuration"].(map[string]interface{})["plugins"].([]map[string]interface{})[i5]["configuration"] = newValue
 													}
 												}
 											}

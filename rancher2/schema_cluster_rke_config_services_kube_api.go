@@ -10,14 +10,18 @@ import (
 )
 
 const (
-	clusterRKEConfigServicesKubeAPIApiversionTag                   = "apiVersion"
-	clusterRKEConfigServicesKubeAPIKindTag                         = "kind"
-	clusterRKEConfigServicesKubeAPIAuditLogConfigPolicyAPIDefault  = "audit.k8s.io/v1"
-	clusterRKEConfigServicesKubeAPIEventRateLimitConfigAPIDefault  = "eventratelimit.admission.k8s.io/v1alpha1"
-	clusterRKEConfigServicesKubeAPIEncryptionConfigAPIDefault      = "apiserver.config.k8s.io/v1"
-	clusterRKEConfigServicesKubeAPIAuditLogConfigPolicyKindDefault = "Policy"
-	clusterRKEConfigServicesKubeAPIEventRateLimitConfigKindDefault = "Configuration"
-	clusterRKEConfigServicesKubeAPIEncryptionConfigKindDefault     = "EncryptionConfiguration"
+	clusterRKEConfigServicesKubeAPIApiversionTag                                = "apiVersion"
+	clusterRKEConfigServicesKubeAPIKindTag                                      = "kind"
+	clusterRKEConfigServicesKubeAPIAuditLogConfigPolicyAPIDefault               = "audit.k8s.io/v1"
+	clusterRKEConfigServicesKubeAPIEventRateLimitConfigAPIDefault               = "eventratelimit.admission.k8s.io/v1alpha1"
+	clusterRKEConfigServicesKubeAPIEncryptionConfigAPIDefault                   = "apiserver.config.k8s.io/v1"
+	clusterRKEConfigServicesKubeAPIAdmissionConfigurationAPIDefault             = "apiserver.config.k8s.io/v1"
+	clusterRKEConfigServicesKubeAPIAdmissionConfigurationPodSecurityAPIDefault  = "pod-security.admission.config.k8s.io/v1"
+	clusterRKEConfigServicesKubeAPIAuditLogConfigPolicyKindDefault              = "Policy"
+	clusterRKEConfigServicesKubeAPIEventRateLimitConfigKindDefault              = "Configuration"
+	clusterRKEConfigServicesKubeAPIEncryptionConfigKindDefault                  = "EncryptionConfiguration"
+	clusterRKEConfigServicesKubeAPIAdmissionConfigurationKindDefault            = "AdmissionConfiguration"
+	clusterRKEConfigServicesKubeAPIAdmissionConfigurationPodSecurityKindDefault = "PodSecurityConfiguration"
 )
 
 var (
@@ -28,6 +32,159 @@ var (
 )
 
 //Schemas
+
+func clusterRKEConfigServicesKubeAPIAdmissionConfigurationFieldsV0() map[string]*schema.Schema {
+	s := map[string]*schema.Schema{
+		"api_version": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     clusterRKEConfigServicesKubeAPIAdmissionConfigurationAPIDefault,
+			Description: "Admission configuration ApiVersion",
+		},
+		"kind": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     clusterRKEConfigServicesKubeAPIAdmissionConfigurationKindDefault,
+			Description: "Admission configuration Kind",
+		},
+		// "name": {
+		// 	Type:        schema.TypeString,
+		// 	Required:    true,
+		// 	Description: "Admission configuration name",
+		// },
+		// "path": {
+		// 	Type:        schema.TypeString,
+		// 	Optional:    true,
+		// 	Description: "Admission configuration path",
+		// },
+		"plugins": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: clusterRKEConfigServicesKubeAPIAdmissionConfigurationPluginsFieldsV0(),
+			},
+			Description: "Admission configuration plugins",
+		},
+	}
+	return s
+}
+
+func clusterRKEConfigServicesKubeAPIAdmissionConfigurationFields() map[string]*schema.Schema {
+	s := map[string]*schema.Schema{
+		"api_version": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     clusterRKEConfigServicesKubeAPIAdmissionConfigurationAPIDefault,
+			Description: "Admission configuration ApiVersion",
+		},
+		"kind": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     clusterRKEConfigServicesKubeAPIAdmissionConfigurationKindDefault,
+			Description: "Admission configuration Kind",
+		},
+		// "name": {
+		// 	Type:        schema.TypeString,
+		// 	Required:    true,
+		// 	Description: "Admission configuration name",
+		// },
+		// "path": {
+		// 	Type:        schema.TypeString,
+		// 	Optional:    true,
+		// 	Description: "Admission configuration path",
+		// },
+		"plugins": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: clusterRKEConfigServicesKubeAPIAdmissionConfigurationPluginsFields(),
+			},
+			Description: "Admission configuration plugins",
+		},
+	}
+	return s
+}
+
+func clusterRKEConfigServicesKubeAPIAdmissionConfigurationPluginsFieldsV0() map[string]*schema.Schema {
+	s := map[string]*schema.Schema{
+		"name": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Computed:    true,
+			Description: "Plugin name",
+		},
+		"path": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     "",
+			Description: "Plugin path",
+		},
+		"configuration": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Computed:    true,
+			Description: "Plugin configuration",
+		},
+	}
+	return s
+}
+func clusterRKEConfigServicesKubeAPIAdmissionConfigurationPluginsFields() map[string]*schema.Schema {
+	s := map[string]*schema.Schema{
+		"name": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Computed:    true,
+			Description: "Plugin name",
+		},
+		"path": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     "",
+			Description: "Plugin path",
+		},
+		"configuration": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+			ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+				v, ok := val.(string)
+				if !ok || len(v) == 0 {
+					return
+				}
+				m, err := ghodssyamlToMapInterface(v)
+				if err != nil {
+					errs = append(errs, fmt.Errorf("%q must be in yaml format, error: %v", key, err))
+					return
+				}
+				for _, k := range clusterRKEConfigServicesKubeAPIRequired {
+					check, ok := m[k].(string)
+					if !ok || len(check) == 0 {
+						errs = append(errs, fmt.Errorf("%s is required on yaml", k))
+					}
+					if k == clusterRKEConfigServicesKubeAPIKindTag {
+						if check != clusterRKEConfigServicesKubeAPIAdmissionConfigurationPodSecurityKindDefault {
+							errs = append(errs, fmt.Errorf("%s value %s should be: %s", k, check, clusterRKEConfigServicesKubeAPIAdmissionConfigurationPodSecurityKindDefault))
+						}
+					}
+
+				}
+				return
+			},
+			DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+				if old == "" || new == "" {
+					return false
+				}
+				oldMap, _ := ghodssyamlToMapInterface(old)
+				newMap, _ := ghodssyamlToMapInterface(new)
+				return reflect.DeepEqual(oldMap, newMap)
+			},
+			Description: "Plugin configuration",
+		},
+	}
+	return s
+}
 
 func clusterRKEConfigServicesKubeAPIAuditLogConfigFields() map[string]*schema.Schema {
 	s := map[string]*schema.Schema{
@@ -283,8 +440,13 @@ func clusterRKEConfigServicesKubeAPISecretsEncryptionConfigFieldsData() map[stri
 func clusterRKEConfigServicesKubeAPIFieldsV0() map[string]*schema.Schema {
 	s := map[string]*schema.Schema{
 		"admission_configuration": {
-			Type:     schema.TypeMap,
+			Type:     schema.TypeList,
+			MaxItems: 1,
 			Optional: true,
+			Elem: &schema.Resource{
+				Schema: clusterRKEConfigServicesKubeAPIAdmissionConfigurationFieldsV0(),
+			},
+			Description: "Cluster admission configuration",
 		},
 		"always_pull_images": {
 			Type:     schema.TypeBool,
@@ -361,8 +523,13 @@ func clusterRKEConfigServicesKubeAPIFieldsV0() map[string]*schema.Schema {
 func clusterRKEConfigServicesKubeAPIFields() map[string]*schema.Schema {
 	s := map[string]*schema.Schema{
 		"admission_configuration": {
-			Type:     schema.TypeMap,
+			Type:     schema.TypeList,
+			MaxItems: 1,
 			Optional: true,
+			Elem: &schema.Resource{
+				Schema: clusterRKEConfigServicesKubeAPIAdmissionConfigurationFields(),
+			},
+			Description: "Cluster admission configuration",
 		},
 		"always_pull_images": {
 			Type:     schema.TypeBool,
@@ -440,8 +607,13 @@ func clusterRKEConfigServicesKubeAPIFields() map[string]*schema.Schema {
 func clusterRKEConfigServicesKubeAPIFieldsData() map[string]*schema.Schema {
 	s := map[string]*schema.Schema{
 		"admission_configuration": {
-			Type:     schema.TypeMap,
+			Type:     schema.TypeList,
+			MaxItems: 1,
 			Optional: true,
+			Elem: &schema.Resource{
+				Schema: clusterRKEConfigServicesKubeAPIAdmissionConfigurationFields(),
+			},
+			Description: "Cluster admission configuration",
 		},
 		"always_pull_images": {
 			Type:     schema.TypeBool,
